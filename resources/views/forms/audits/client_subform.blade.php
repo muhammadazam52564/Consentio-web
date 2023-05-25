@@ -59,8 +59,24 @@
                       <td>{{ $loop->iteration }}</td>
                       <td> @if(session('locale') == 'fr') {{$sub_form->sub_form_title_fr}} @else {{$sub_form->sub_form_title}}@endif</td>
                       <td> <span class="fs-14"> @if(session('locale')=='fr') {{ $sub_form->title_fr ? $sub_form->group_name_fr : $sub_form->group_name }}  @else {{ $sub_form->group_name }} @endif </span> </td> 
-                      <td> <span class="fs-14"> A-{{ $sub_form->client_id }}-{{ $sub_form->asset_number }} </span> </td> 
-                      <td> <span class="fs-14">  {{ $sub_form->asset_name }}  </span></td> 
+                      <td> 
+                        <span class="fs-14"> 
+                          @if(empty($sub_form->other_number))
+                            A-{{ $sub_form->client_id }}-{{ $sub_form->asset_number }}
+                          @else
+                            N-{{ $sub_form->client_id }}-{{ $sub_form->other_number }}
+                          @endif
+                        </span> 
+                      </td> 
+                      <td> 
+                        <span class="fs-14"> 
+                          @if(empty($sub_form->other_number))
+                            {{ $sub_form->asset_name }} 
+                          @else
+                            {{ $sub_form->other_id }} 
+                          @endif
+                        </span> 
+                      </td>
                       <td>  <a href="{{ url('audit/form/'.$sub_form->parent_form_id) }}" ><i class="far fa-eye"></i> {{ __('View Form') }}</a> </td>
                       <td class="text-center">
                         @if ($sub_form->form_link_id != '')

@@ -72,7 +72,7 @@ class AuditFormsController extends Controller{
         $sub_forms = DB::table('sub_forms')
             ->join("forms", "sub_forms.parent_form_id", "forms.id")
             ->join('audit_questions_groups', 'audit_questions_groups.id', 'forms.group_id')
-            ->join('assets', 'assets.id', 'sub_forms.asset_id')
+            ->leftjoin('assets', 'assets.id', 'sub_forms.asset_id')
             ->leftjoin('user_form_links', 'sub_forms.id', '=', 'user_form_links.sub_form_id')
             ->where('user_form_links.user_id', $user_id)
             ->where('type', 'audit')
@@ -80,6 +80,8 @@ class AuditFormsController extends Controller{
                 'sub_forms.parent_form_id',
                 'forms.title as title', 
                 'sub_forms.client_id',
+                'sub_forms.other_id',
+                'sub_forms.other_number',
                 'forms.title_fr as title_fr', 
                 'sub_forms.title as sub_form_title', 
                 'sub_forms.title_fr as sub_form_title_fr',
@@ -283,7 +285,7 @@ class AuditFormsController extends Controller{
         if (Auth::user()->role == 2){    
             $ext_forms = DB::table('sub_forms')
                 ->join('user_form_links as ufl', 'ufl.sub_form_id', 'sub_forms.id')
-                ->join('assets', 'assets.id', 'sub_forms.asset_id')
+                ->leftjoin('assets', 'assets.id', 'sub_forms.asset_id')
                 ->join('forms', 'forms.id', 'sub_forms.parent_form_id')
                 ->join('audit_questions_groups', 'audit_questions_groups.id', 'forms.group_id')
                 ->where('ufl.is_locked', 1)
@@ -297,6 +299,8 @@ class AuditFormsController extends Controller{
                     sub_forms.title as subform_title, 
                     sub_forms.id as id, 
                     sub_forms.title_fr as subform_title_fr, 
+                    sub_forms.other_id, 
+                    sub_forms.other_number, 
                     assets.asset_number, 
                     assets.name as asset_name, 
                     audit_questions_groups.group_name,
@@ -308,7 +312,7 @@ class AuditFormsController extends Controller{
             $int_forms = DB::table('sub_forms')
                 ->join('user_form_links as ufl', 'ufl.sub_form_id', 'sub_forms.id')
                 ->join('users', 'users.id', 'ufl.user_id')
-                ->join('assets', 'assets.id', 'sub_forms.asset_id')
+                ->leftjoin('assets', 'assets.id', 'sub_forms.asset_id')
                 ->join('forms', 'forms.id', 'sub_forms.parent_form_id')
                 ->join('audit_questions_groups', 'audit_questions_groups.id', 'forms.group_id')
                 ->where('ufl.is_locked', 1)
@@ -323,6 +327,8 @@ class AuditFormsController extends Controller{
                     sub_forms.id as id, 
                     sub_forms.title as subform_title,
                     sub_forms.title_fr as subform_title_fr,
+                    sub_forms.other_id, 
+                    sub_forms.other_number,
                     form_link_id as form_link,
                     assets.asset_number, 
                     assets.name as asset_name,
@@ -340,7 +346,7 @@ class AuditFormsController extends Controller{
             $int_forms = DB::table('user_form_links as ufl')
                 ->join('users', 'users.id', 'ufl.user_id')
                 ->join('sub_forms', 'sub_forms.id', 'ufl.sub_form_id')
-                ->join('assets', 'assets.id', 'sub_forms.asset_id')
+                ->leftjoin('assets', 'assets.id', 'sub_forms.asset_id')
                 ->join('forms', 'forms.id', 'sub_forms.parent_form_id')
                 ->join('audit_questions_groups', 'audit_questions_groups.id', 'forms.group_id')
                 ->where('ufl.user_id', Auth::user()->id)
@@ -351,6 +357,8 @@ class AuditFormsController extends Controller{
                     forms.title_fr as form_title_fr,
                     sub_forms.title as subform_title,
                     sub_forms.title_fr as subform_title_fr,
+                    sub_forms.other_id, 
+                    sub_forms.other_number,
                     form_link_id as form_link,
                     audit_questions_groups.group_name,
                     audit_questions_groups.group_name_fr,
@@ -387,7 +395,7 @@ class AuditFormsController extends Controller{
             $ext_forms = DB::table('sub_forms')
                 ->join('user_form_links as ufl', 'ufl.sub_form_id', 'sub_forms.id')
 
-                ->join('assets', 'assets.id', 'sub_forms.asset_id')
+                ->leftjoin('assets', 'assets.id', 'sub_forms.asset_id')
 
                 ->join('forms', 'forms.id', 'sub_forms.parent_form_id')
                 ->join('audit_questions_groups', 'audit_questions_groups.id', 'forms.group_id')
@@ -404,6 +412,8 @@ class AuditFormsController extends Controller{
                     sub_forms.title as subform_title, 
                     sub_forms.id as id, 
                     sub_forms.title_fr as subform_title_fr, 
+                    sub_forms.other_id, 
+                    sub_forms.other_number, 
                     assets.asset_number, 
                     assets.name as asset_name, 
                     audit_questions_groups.group_name,
@@ -415,7 +425,7 @@ class AuditFormsController extends Controller{
             $int_forms = DB::table('sub_forms')
                 ->join('user_form_links as ufl', 'ufl.sub_form_id', 'sub_forms.id')
                 ->join('users', 'users.id', 'ufl.user_id')
-                ->join('assets', 'assets.id', 'sub_forms.asset_id')
+                ->leftjoin('assets', 'assets.id', 'sub_forms.asset_id')
                 ->join('forms', 'forms.id', 'sub_forms.parent_form_id')
                 ->join('audit_questions_groups', 'audit_questions_groups.id', 'forms.group_id')
                 ->where('ufl.is_locked', 0)
@@ -431,6 +441,8 @@ class AuditFormsController extends Controller{
                     sub_forms.id as id, 
                     sub_forms.title as subform_title,
                     sub_forms.title_fr as subform_title_fr,
+                    sub_forms.other_id, 
+                    sub_forms.other_number, 
                     form_link_id as form_link,
                     assets.asset_number, 
                     assets.name as asset_name,
@@ -448,7 +460,7 @@ class AuditFormsController extends Controller{
             $int_forms = DB::table('user_form_links as ufl')
                 ->join('users', 'users.id', 'ufl.user_id')
                 ->join('sub_forms', 'sub_forms.id', 'ufl.sub_form_id')
-                ->join('assets', 'assets.id', 'sub_forms.asset_id')
+                ->leftjoin('assets', 'assets.id', 'sub_forms.asset_id')
                 ->join('forms', 'forms.id', 'sub_forms.parent_form_id')
                 ->join('audit_questions_groups', 'audit_questions_groups.id', 'forms.group_id')
                 ->where('ufl.user_id', Auth::user()->id)
@@ -459,6 +471,8 @@ class AuditFormsController extends Controller{
                     forms.title_fr as form_title_fr,
                     sub_forms.title as subform_title,
                     sub_forms.title_fr as subform_title_fr,
+                    sub_forms.other_id, 
+                    sub_forms.other_number, 
                     form_link_id as form_link,
                     audit_questions_groups.group_name,
                     audit_questions_groups.group_name_fr,

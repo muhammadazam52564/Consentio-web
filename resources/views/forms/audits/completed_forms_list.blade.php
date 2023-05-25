@@ -83,10 +83,18 @@
                   @endif
                 </td>
                 <td>
-                  A-{{ $form_info->client_id }}-{{ $form_info->asset_number }}
+                    @if(empty($form_info->other_number))
+                      A-{{ $form_info->client_id }}-{{ $form_info->asset_number }}
+                    @else
+                      N-{{ $form_info->client_id }}-{{ $form_info->other_number }}
+                    @endif
                 </td>
                 <td>
-                  {{ $form_info->name }}
+                    @if(empty($form_info->other_number))
+                        {{ $form_info->asset_name }} 
+                    @else
+                        {{ $form_info->other_id }} 
+                    @endif
                 </td>
                 <!--  -->
                 <!-- @if(Auth::user()->role == 2)
