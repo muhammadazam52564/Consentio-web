@@ -505,7 +505,7 @@ class AuditFormsController extends Controller{
         $ext_ids_list = array_column($external_users_count, 'id');
 
         $subforms_list = DB::table('sub_forms')
-            ->join('assets', 'assets.id', 'sub_forms.asset_id')
+            ->leftjoin('assets', 'assets.id', 'sub_forms.asset_id')
             ->join('forms', 'forms.id', '=', 'sub_forms.parent_form_id')
             ->join('audit_questions_groups', 'audit_questions_groups.id', 'forms.group_id')
             ->where('parent_form_id', '=', $form_id)
@@ -515,6 +515,7 @@ class AuditFormsController extends Controller{
         } else {
             $subforms_list = $subforms_list->where('sub_forms.client_id', [$client_id, Auth::id()])->get();
         }
+        // dd($subforms_list);
 
         foreach ($subforms_list as $key => $subforms) {
             if (($sf_index = array_search($subforms->id, $int_ids_list)) !== false) {
@@ -537,35 +538,76 @@ class AuditFormsController extends Controller{
     }
 
     public function create_subform(Request $req){
+        // dd($req->all());
         $title          = $req->input('subform_title');
         $title_fr       = $req->input('subform_title_fr');
+        $item_type      = $req->input('item_type');
         $form_id        = $req->input('form_id');
         $expiry_time    = date('Y-m-d H:i:s', strtotime("+10 days"));
         $client_id      = Auth::user()->client_id;
         $asset_id       = $req->input('asset_id');
+        $other_id       = $req->input('other_id');
 
-        $form_group             = DB::table('forms')->find($form_id)->group_id;
-        $parent_form_id         = DB::table('sub_forms')->where('asset_id', $asset_id)->pluck('parent_form_id');
-        $already_group_assigned = DB::table('forms')->whereIn('id', $parent_form_id)->where('group_id', $form_group)->count();
+        if($asset_id){
+            $form_group             = DB::table('forms')->find($form_id)->group_id;
+            $parent_form_id         = DB::table('sub_forms')->where('asset_id', $asset_id)->pluck('parent_form_id');
+            $already_group_assigned = DB::table('forms')->whereIn('id', $parent_form_id)->where('group_id', $form_group)->count();
 
-        if ($already_group_assigned > 0) {
-            return response()->json(['status' => 'error', 'msg' => __('Sub-form already exists with Same group')]);
+            if ($already_group_assigned > 0) {
+                return response()->json(['status' => 'error', 'msg' => __('Sub-form already exists with Same Asset Item')]);
+            }
         }
+        else{
+            $form_group             = DB::table('forms')->find($form_id)->group_id;
+            $parent_form_id         = DB::table('sub_forms')->where('other_id', $other_id)->pluck('parent_form_id');
+            $already_group_assigned = DB::table('forms')->whereIn('id', $parent_form_id)->where('group_id', $form_group)->count();
+
+            if ($already_group_assigned > 0) {
+                return response()->json(['status' => 'error', 'msg' => __('Sub-form already exists with Same Other Item')]);
+            }
+        }
+
         $existing_subform = DB::table('sub_forms')->where('parent_form_id', '=', $form_id)->where('client_id', '=', $client_id)->where('title', '=', $title)->where('title_fr', '=', $title_fr)->first();
         if (Auth::user()->role == 2 && !empty($existing_subform)) {
             return response()->json(['status' => 'error', 'msg' => __('Sub-form by this name already exists')]);
         }
 
-        $subform_id = DB::table('sub_forms')->insertGetId([
-            'title'         => $title,
-            'title_fr'      => $title_fr,
-            'parent_form_id' => $form_id,
-            'client_id'     => $client_id,
-            'client_id'     => $client_id,
-            'asset_id'      => $asset_id,
-            'expiry_time'   => $expiry_time
+        if($other_id){
+            $latest_assigned_number = 0;
+            if (DB::table('sub_forms')->where('client_id', $client_id)->orderby('other_number', 'DESC')->count() > 0) {
+                $latest_assigned_number =  DB::table('sub_forms')->where('client_id', $client_id)->orderby('other_number', 'DESC')->first()->other_number;
+            }
+            $subform_id = DB::table('sub_forms')->insertGetId([
+                'title'         => $title,
+                'title_fr'      => $title_fr,
+                'item_type'      => $item_type,
+                'parent_form_id' => $form_id,
+                'client_id'     => $client_id,
+                'client_id'     => $client_id,
+                'asset_id'      => $asset_id,
+                'other_id'      => $other_id,
+                'other_number'  => $latest_assigned_number + 1,
+                'expiry_time'   => $expiry_time
+    
+            ]);
+        }
+        else{
+            $subform_id = DB::table('sub_forms')->insertGetId([
+                'title'         => $title,
+                'title_fr'      => $title_fr,
+                'item_type'      => $item_type,
+                'parent_form_id' => $form_id,
+                'client_id'     => $client_id,
+                'client_id'     => $client_id,
+                'asset_id'      => $asset_id,
+                'other_id'      => $other_id,
+                'expiry_time'   => $expiry_time
+    
+            ]);
 
-        ]);
+        }
+
+        
 
         //$this->assign_subform_to_client_users($client_id, $form_id, $subform_id);
 

@@ -245,12 +245,21 @@
                     </td> 
                     <td>
                       <span class="fs-14">
-                        A-{{ $sub_forms[$i]->client_id }}-{{ $sub_forms[$i]->asset_number }} 
+                        @if(empty($sub_forms[$i]->other_number))
+                          A-{{ $sub_forms[$i]->client_id }}-{{ $sub_forms[$i]->asset_number }}
+                        @else
+                          N-{{ $sub_forms[$i]->client_id }}-{{ $sub_forms[$i]->other_number }}
+                        @endif
                       </span>
                     </td> 
                     <td>
                       <span class="fs-14">
+                        @if(empty($sub_forms[$i]->other_number))
                           {{ $sub_forms[$i]->asset_name }} 
+                        @else
+                          {{ $sub_forms[$i]->other_id }} 
+                        @endif
+                          
                       </span>
                     </td> 
 
@@ -378,12 +387,22 @@
       subform_info['_token'] = '{{ csrf_token() }}';
 
       $(document).on('click', '.create-subform', function (){
-        const selected_asset = $('#subform-asset-'+counter).val();
+        const item_type = $('#item-type-'+counter).val();
+        // alert(item_type);
+
+        if(item_type == "assets"){
+          // alert('code of asset');
+          selected_asset = $('#subform-asset-'+counter).val();
+        }
+        else{
+          // alert('code of other');
+          selected_asset = $('#subform-other-'+counter).val();
+        }
 
         if (selected_asset == "" || selected_asset == null) {
           swal({
-            title:              "{!! __('NO ASSET SELECTED') !!}",
-            text:               "{!! __('NO ASSET SELECTED TO ADD AUDIT FORM') !!}",
+            title:              "{!! __('NO ITEM SELECTED') !!}",
+            text:               "{!! __('NO ITEM SELECTED TO ADD AUDIT FORM') !!}",
             type:               "warning",
             showCancelButton:    false,
             confirmButtonClass: "btn-warning",
@@ -409,7 +428,9 @@
         subform_info['users']             = $(this).prev().prev().val();
         subform_info['subform_title']     = $('#subform-title-'+counter).val();
         subform_info['subform_title_fr']  = $('#subform-title-fr-'+counter).val();
+        subform_info['item_type']         = $('#item-type-'+counter).val();
         subform_info['asset_id']          = $('#subform-asset-'+counter).val();
+        subform_info['other_id']          = $('#subform-other-'+counter).val();
         subform_info['form_id']           = <?php echo $form_info->id ?>;
         subform_info['client_id']         = <?php echo  Auth::id() ?>;
 
@@ -557,13 +578,25 @@
               '</div>'+
               '<div class="row py-2">'+
                 '<div class="col-12 d-flex">'+
-                  '<div class="w-50">'+
-                    '<label> {{ __("ORG ASSETS") }}</label>'+
+                  '<div class="w-50 mr-1">'+
+                    '<label> {{ __("AUDIT ITEM") }}</label>'+
+                    '<select class="form-control" id="item-type-'+counter+'">'+
+                      '<option value="">-- {!! __('Select') !!} --</option>'+
+                      '<option value="assets">{!! __('Assets') !!}</option>'+
+                      '<option value="others">{!! __('Others') !!}</option>'+
+                    '</select>'+
+                  '</div>'+
+                  '<div class="audit w-50">'+
+                    '<label> {{ __("ASSETS ITEM") }}</label>'+
                     '<select class="form-control" id="subform-asset-'+counter+'">'+
                       '<option value="">-- {!! __('SELECT ASSET') !!} --</option>'+options+
                     '</select>'+
                   '</div>'+
-                  '<div class="w-50 pl-2">'+
+                  '<div class="other w-50">'+
+                    '<label>{{ __("OTHER ITEM") }}</label>'+
+                    '<input type="text" class="form-control oth" id="subform-other-'+counter+'">'+
+                  '</div>'+
+                  '<div class="w-10 pl-2">'+
                     '<label "> </label><br/>'+
                     '<button class="btn rounded_button btn-primary create-subform mt-2" id="subform-'+counter+'" asset_count="'+ asetscount +'">{!! __('Create') !!}</button>'+
                   '</div>'+
@@ -572,6 +605,27 @@
             '</div>'+
           '</div>'
         );
+
+        // Hide audit and other elements initially
+        $('.audit').hide();
+        $('.other').hide();
+
+        // Event listener for item type dropdown
+        $('#item-type-' + counter).on('change', function() {
+          var selectedValue = $(this).val();
+          if (selectedValue === 'assets') {
+            $('.audit').show();
+            $('.other').hide();
+            $('#subform-other-'+counter).val('');
+          } else if (selectedValue === 'others') {
+            $('.audit').hide();
+            $('.other').show();
+            $('#subform-asset-'+counter).val('');
+          } else {
+            $('.audit').hide();
+            $('.other').hide();
+          }
+        });
       }
     });
   </script>
