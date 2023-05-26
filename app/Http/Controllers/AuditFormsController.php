@@ -353,6 +353,7 @@ class AuditFormsController extends Controller{
                 ->where('is_locked', 1)
                 ->select('*', DB::raw(
                     'users.email,
+                    users.client_id,
                     forms.title as form_title,
                     forms.title_fr as form_title_fr,
                     sub_forms.title as subform_title,
@@ -467,6 +468,7 @@ class AuditFormsController extends Controller{
                 ->where('is_locked', 0)
                 ->select('*', DB::raw(
                     'users.email,
+                    users.client_id,
                     forms.title as form_title,
                     forms.title_fr as form_title_fr,
                     sub_forms.title as subform_title,
@@ -2045,4 +2047,3 @@ class AuditFormsController extends Controller{
             'client_list' => $client_list]);
     }
 }
-

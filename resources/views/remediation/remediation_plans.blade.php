@@ -16,9 +16,9 @@
                     <thead class="back_blue">
                         <tr>
                             <th> # </th>
-                            <th> Form </th>
+                            <th> Audit </th>
                             <th> ITEM # </th>
-                            <th> ASSET ITEM </th>
+                            <th> AUDIT ITEM </th>
                             <th> Action </th>
                         </tr>
                     </thead>
@@ -27,7 +27,13 @@
                             <tr>
                                 <td>{{$loop->iteration}}</td>
                                 <td> @if(true == false) {{ $plan->form_title_fr }}  @else {{ $plan->form_title }} @endif </td>
-                                <td>{{$plan->client_id}}-{{$plan->asset_number}}</td>
+                                <td>
+                                    @if($plan->type == "others")
+                                        N-
+                                    @else
+                                        A-
+                                    @endif
+                                    {{$plan->client_id}}-{{$plan->asset_number}}</td>
                                 <td>{{ $plan->name }}</td>
                                 <td><a href="{{ route('single_remediation', $plan->sub_form_id) }}" class="btn btn-primary btn-sm"><i class="fa fa-eye"></i></a></td>
                             </tr>

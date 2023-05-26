@@ -201,6 +201,7 @@
     "Signature": "Signature",
     "Not Sure": "Pas certain",
     "Other": "Autre",
+    "OTHER ITEM": "AUTRE ARTICLE",
     "Question": "Question",
     "Assets": "Actifs",
     "Add More": "Ajouter plus de",
@@ -1012,7 +1013,8 @@
     "COMPLETED AUDITS"      : "VÉRIFICATIONS RÉALISÉES",
     "PENDING AUDITS"        : "VÉRIFICATIONS EN COURS",
     "AUDIT FORM ASSIGNEES"  : "ATTRIBUABLES DU FORMULAIRE D'AUDIT",
-
+    "remediation_item_name": "Nom de l'article",
+    "remediation_item_number": "Numéro d'article",
     "NO ASSET FOUND"        : "NO ASSET FOUND",
     "SELECT ASSET"          : "SELECT ASSET",
     "ORG ASSETS"            : "Actifs de l'organisation",

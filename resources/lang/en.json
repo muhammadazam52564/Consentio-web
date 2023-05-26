@@ -142,6 +142,7 @@
     "Executive Management": "Executive Management",
     "External Parties": "External Parties",
     "Other": "Other",
+    "OTHER ITEM": "OTHER ITEM",
     "What is the project starting date?": "What is the project starting date?",
     "Date Picker Option": "Date Picker Option",
     "Submit": "Submit",
@@ -1036,7 +1037,8 @@
 
 
     "Add Remediation plan": "Add Remediation plan",
-    "remediation_asset_name": "Asset Name",
+    "remediation_item_name": "Item Name",
+    "remediation_item_number": "Item Number",
     "remediation_asset_business_unit": "Business unit",
     "Audit Form Name" : "Audit Name"
 

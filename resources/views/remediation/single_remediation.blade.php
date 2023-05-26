@@ -22,8 +22,15 @@
             </div>
 
             <div class="col-md-8 px-5 offset-2 py-2 d-flex justify-content-between">
-                <h4>{{__("remediation_asset_name")}} : @if(session('locale') == 'fr') {{ $remediation_plans[0]->assets_name }} @else {{ $remediation_plans[0]->assets_name }}@endif</h4>
-                <h4>{{__("remediation_asset_business_unit")}} : @if(session('locale') == 'fr') {{ $remediation_plans[0]->business_unit }} @else {{ $remediation_plans[0]->business_unit }}@endif</h4>
+                <h4>{{__("remediation_item_name")}} : @if(session('locale') == 'fr') {{ $remediation_plans[0]->assets_name }} @else {{ $remediation_plans[0]->assets_name }}@endif</h4>
+                <h4>{{__("remediation_item_number")}} : 
+                    @if($remediation_plans[0]->type == 'others')
+                        N-
+                    @else
+                        A-
+                    @endif
+                    {{Auth::user()->client_id}}
+                    @if(session('locale') == 'fr') {{ $remediation_plans[0]->asset_number }} @else {{ $remediation_plans[0]->asset_number }}@endif</h4>
             </div>
 
             <div class="col-12 overflow-auto py-3">

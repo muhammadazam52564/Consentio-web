@@ -9,13 +9,27 @@
     <section class="assets_list">
         <div class="row bg-white">
             <div class="col-12 py-3">
-                <button class="btn btn-success" onclick="load_information()"> Back </button>
+
+                <h2 align="center">
+                    @if(session('locale') == 'fr')
+                        {{ $asset->title_fr }}
+                    @else 
+                        {{ $asset->title }}
+                    @endif
+                </h2>
             </div>
-            <div class="col-12 d-flex">
-                <h4>{{__("remediation_asset_name")}}</h5> <b> : @if(session('locale') == 'fr') {{ $asset->name }} @else {{ $asset->name }} </b> @endif
+            <div class="col-6 d-flex justify-content-center">
+                <h4>{{__("remediation_item_name")}}
+                    : @if(session('locale') == 'fr') {{ $asset->name }} @else {{ $asset->name }}</h4> @endif
             </div>
-            <div class="col-12 d-flex">
-                <h4>{{__("remediation_asset_business_unit")}}</h4><b> : @if(session('locale') == 'fr') {{ $asset->business_unit }} @else {{ $asset->business_unit }} </b> @endif
+            <div class="col-6 d-flex justify-content-center">
+                <h4>{{__("remediation_item_number")}}
+                    @if($asset->type == 'others')
+                        N-
+                    @else
+                        A-
+                    @endif
+                    {{Auth::user()->client_id}}-@if(session('locale') == 'fr') {{ $asset->asset_number }} @else {{ $asset->asset_number }} </h4> @endif
             </div>
 
             <div class="col-12 overflow-auto py-3">
@@ -50,9 +64,11 @@
                 url: '/audit/remediation/controls/'+window.location.pathname.split("/").pop(),
                 type:'GET',
                 success: function(res){
+                    console.log(res);
                     questions   = res.questions;
                     users       = res.users;
                     render_data();
+                    return ;
                 }
             });
         }

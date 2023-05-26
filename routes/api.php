@@ -564,9 +564,34 @@
         }
     });
 
+
+
+    Route::get('sub_forms', function () {
+        try {
+            Schema::dropIfExists('sub_forms');
+            Schema::create('sub_forms', function (Blueprint $table) {
+                $table->increments('id');
+                $table->string('title')->nullable();
+                $table->string('title_fr')->nullable();
+                $table->integer('parent_form_id')->nullable();
+                $table->integer('client_id')->nullable();
+                $table->string('item_type')->nullable();
+                $table->integer('other_number')->nullable();
+                $table->string('other_id')->nullable();
+                $table->integer('asset_id')->nullable();
+                $table->datetime('expiry_time')->nullable();
+                $table->timestamps();
+            });
+            return "ok";
+        } catch (\Exception $th) {
+            return $th->getMessage();
+        }
+    });
+
     Route::middleware('auth:api')->get('/user', function (Request $request) {
         return $request->user();
     });
+
 
 
 

@@ -366,7 +366,7 @@
         counter++;
         console.log("test");
         let form_id = window.location.pathname.split("/").pop();
-        var options = "";
+        var options = '<option value="">-- {!! __("Select") !!} --</option>';
 
         $.ajax({
           url:"/audit/get-assets/"+ form_id,
@@ -375,6 +375,7 @@
             const assets   = response.assets;
             let asetscount = assets.length
             assets.forEach(function(item) {
+              console.log("item-----", item);
               options += '<option value="'+item.id+'">'+ item.name +'</option>'
             });
             append_subform(options, counter, asetscount)
@@ -581,33 +582,34 @@
                   '<div class="w-50 mr-1">'+
                     '<label> {{ __("AUDIT ITEM") }}</label>'+
                     '<select class="form-control" id="item-type-'+counter+'">'+
-                      '<option value="">-- {!! __('Select') !!} --</option>'+
                       '<option value="assets">{!! __('Assets') !!}</option>'+
-                      '<option value="others">{!! __('Others') !!}</option>'+
+                      '<option value="others">{!! __('Other') !!}</option>'+
                     '</select>'+
                   '</div>'+
                   '<div class="audit w-50">'+
-                    '<label> {{ __("ASSETS ITEM") }}</label>'+
+                    '<label> {{ __("ASSETS") }}</label>'+
                     '<select class="form-control" id="subform-asset-'+counter+'">'+
-                      '<option value="">-- {!! __('SELECT ASSET') !!} --</option>'+options+
+                      options+
                     '</select>'+
                   '</div>'+
                   '<div class="other w-50">'+
                     '<label>{{ __("OTHER ITEM") }}</label>'+
                     '<input type="text" class="form-control oth" id="subform-other-'+counter+'">'+
                   '</div>'+
-                  '<div class="w-10 pl-2">'+
-                    '<label "> </label><br/>'+
-                    '<button class="btn rounded_button btn-primary create-subform mt-2" id="subform-'+counter+'" asset_count="'+ asetscount +'">{!! __('Create') !!}</button>'+
-                  '</div>'+
                 '</div>'+
+              '<div class="col-12 d-flex">'+
+                '<div class="w-50 pl-2">'+
+                  '<label "> </label><br/>'+
+                  '<button class="btn rounded_button btn-primary create-subform mt-2" id="subform-'+counter+'" asset_count="'+ asetscount +'">{!! __('Create') !!}</button>'+
+                '</div>'+
+              '</div>'+
               '</div>'+
             '</div>'+
           '</div>'
         );
 
         // Hide audit and other elements initially
-        $('.audit').hide();
+        // $('.audit').hide();
         $('.other').hide();
 
         // Event listener for item type dropdown

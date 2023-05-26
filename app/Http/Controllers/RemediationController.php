@@ -9,6 +9,7 @@ use App\EvaluationRating;
 use App\RemediationPlan;
 use App\UserResponse;
 use App\UserFormLink;
+use App\SubForm;
 use App\Question;
 use App\User;
 use Auth;
@@ -20,7 +21,7 @@ class RemediationController extends Controller{
         if(Auth::user()->role == 2){
             $remediation_plans = DB::table("remediation_plans")
                 ->join("sub_forms","sub_forms.id", "remediation_plans.sub_form_id")
-                ->join("assets", "assets.id", "sub_forms.asset_id")
+                // ->join("assets", "assets.id", "sub_forms.asset_id")
                 ->select(
                     "remediation_plans.client_id", 
                     "remediation_plans.id as remediation_plan_id", 
@@ -28,32 +29,45 @@ class RemediationController extends Controller{
                     "remediation_plans.sub_form_id as sub_form_id", 
                     "sub_forms.title as form_title",
                     "sub_forms.title_fr as form_title_fr",
-                    "assets.name",
-                    "assets.asset_number"
+                    "sub_forms.item_type as type",
+                    "sub_forms.other_number as asset_number",
+                    "sub_forms.other_id as name"
                 )
                 ->groupby("remediation_plans.sub_form_id")
                 ->having("remediation_plans.client_id", Auth::user()->client_id)->get();  
+
+                foreach($remediation_plans as $plan){
+                    if ($plan->type != "others") {
+                        $sub_form           = SubForm::find($plan->sub_form_id);
+                        $asset              =  DB::table('assets')->find($sub_form->asset_id);
+                        $plan->asset_number = $asset->asset_number;
+                        $plan->name         = $asset->name;
+                    }
+                }
         }
         else{
             $remediation_plans = DB::table("remediation_plans")
                             ->groupby("sub_form_id")
                             ->where("person_in_charge", Auth::user()->id)
                             ->get();
+            
+            foreach($remediation_plans as $plan){
+                $sub_form = SubForm::find($plan->sub_form_id);
 
-            foreach ($remediation_plans as $plan) {
-                $asset_info = DB::table("sub_forms")
-                                ->join("assets", "assets.id", "sub_forms.asset_id")
-                                ->where('sub_forms.id', $plan->sub_form_id)
-                                ->select(
-                                    "sub_forms.title as form_title",
-                                    "sub_forms.title_fr as form_title_fr",
-                                    "assets.name",
-                                    "assets.asset_number"
-                                )->first();
-                $plan->form_title_fr = $asset_info->form_title_fr;
-                $plan->form_title    = $asset_info->form_title;
-                $plan->name          = $asset_info->name;
-                $plan->asset_number  = $asset_info->asset_number;
+                if ($sub_form->item_type != "others") {
+                    $asset                  =  DB::table('assets')->find($sub_form->asset_id);
+                    $plan->form_title       = $sub_form->title;
+                    $plan->form_title_fr    = $sub_form->title_fr;
+                    $plan->asset_number     = $asset->asset_number;
+                    $plan->name             = $asset->name;
+                    $plan->type             = $sub_form->item_type;
+                }else{
+                    $plan->form_title       = $sub_form->title;
+                    $plan->form_title_fr    = $sub_form->title_fr;
+                    $plan->type             = $sub_form->item_type;
+                    $plan->asset_number     = $sub_form->other_number;
+                    $plan->name             = $sub_form->other_id;
+                }
             }
         }    
         return view("remediation.remediation_plans", compact('remediation_plans'));
@@ -123,7 +137,7 @@ class RemediationController extends Controller{
                         ->join("group_questions", "group_questions.id", "remediation_plans.control_id")
                         ->join("user_responses", "user_responses.question_id", "group_questions.id") 
                         ->join("sub_forms","sub_forms.id", "remediation_plans.sub_form_id")
-                        ->join("assets", "assets.id", "sub_forms.asset_id")
+                        // ->join("assets", "assets.id", "sub_forms.asset_id")
                         ->join("evaluation_rating", "evaluation_rating.id", "user_responses.rating") 
                         ->select(
                             "remediation_plans.*", 
@@ -143,19 +157,33 @@ class RemediationController extends Controller{
                             "sub_forms.id as sub_form_id",
                             "sub_forms.title as sub_form_title",
                             "sub_forms.title_fr as sub_form_title_fr",
-                            "assets.name as assets_name",
-                            "assets.asset_number",
-                            "assets.business_unit",
+                            "sub_forms.item_type as type",
+                            "sub_forms.other_number as business_unit",
+                            "sub_forms.other_number as asset_number",
+                            "sub_forms.other_id as assets_name"
+
+                            // "assets.name as assets_name",
+                            // "assets.asset_number",
+                            // "assets.business_unit",
                         )
                         ->where('sub_forms.id', $sub_form_id)
                         ->where('user_responses.sub_form_id', $sub_form_id)
                 ->get();  
+                foreach($remediation_plans as $plan){
+                    if ($plan->type != "others") {
+                        $sub_form                   = SubForm::find($plan->sub_form_id);
+                        $asset                      =  DB::table('assets')->find($sub_form->asset_id);
+                        $plan->business_unit        = $asset->asset_number;
+                        $plan->assets_name          = $asset->name;
+                    }
+                }
+                // print("<pre>");print_r($remediation_plans); exit;
             }else{
                 $remediation_plans  = DB::table("remediation_plans")
                         ->join("group_questions", "group_questions.id", "remediation_plans.control_id")
                         ->join("user_responses", "user_responses.question_id", "group_questions.id") 
                         ->join("sub_forms","sub_forms.id", "remediation_plans.sub_form_id")
-                        ->join("assets", "assets.id", "sub_forms.asset_id")
+                        // ->join("assets", "assets.id", "sub_forms.asset_id")
                         ->join("evaluation_rating", "evaluation_rating.id", "user_responses.rating") 
                         ->select(
                             "remediation_plans.*", 
@@ -175,18 +203,26 @@ class RemediationController extends Controller{
                             "sub_forms.id as sub_form_id",
                             "sub_forms.title as sub_form_title",
                             "sub_forms.title_fr as sub_form_title_fr",
-                            "assets.name as assets_name",
-                            "assets.asset_number",
-                            "assets.business_unit",
+                            "sub_forms.item_type as type",
+                            "sub_forms.other_number as business_unit",
+                            "sub_forms.other_number as asset_number",
+                            "sub_forms.other_id as assets_name"
                         )
                         ->where('sub_forms.id', $sub_form_id)
                         ->where('user_responses.sub_form_id', $sub_form_id)
                         ->where('remediation_plans.person_in_charge', Auth::user()->id)
 
                 ->get();  
+                foreach($remediation_plans as $plan){
+                    if ($plan->type != "others") {
+                        $sub_form                   = SubForm::find($plan->sub_form_id);
+                        $asset                      =  DB::table('assets')->find($sub_form->asset_id);
+                        $plan->business_unit        = $asset->asset_number;
+                        $plan->assets_name          = $asset->name;
+                    }
+                }
             }
-            // print("<pre>");
-            // print_r($remediation_plans); exit;
+            
 
             foreach ($remediation_plans as $question) {
                 if ($question->type == "dc") {
@@ -250,9 +286,15 @@ class RemediationController extends Controller{
 
     public function add_new_remediation_plan($sub_form_id){
         try {
-            $asset = DB::table('assets')->join('sub_forms', "sub_forms.asset_id", "assets.id")->select('assets.*', 'sub_forms.*' )->where("sub_forms.id", $sub_form_id)->first();
+            if(!SubForm::where('id', $sub_form_id)->whereNotNull('asset_id')->count()){
+                $asset = SubForm::where("sub_forms.id", $sub_form_id)->select("title", "title_fr", "item_type as type", "other_number as asset_number", "other_id as name")->first();
+            }
+            else{
+                $asset = DB::table('assets')->join('sub_forms', "sub_forms.asset_id", "assets.id")->select('assets.*', 'sub_forms.*', 'sub_forms.item_type as type' )->where("sub_forms.id", $sub_form_id)->first();
+            }
             return view("remediation.add_remediation", compact('asset'));
-        } catch(\Exception $ex){
+        } 
+        catch(\Exception $ex){
 
             return redirect()->back()->with('msg', $ex->getMessage());
 
@@ -261,8 +303,9 @@ class RemediationController extends Controller{
 
     public function remediation_control($sub_form_id){
         try {
-            $asset          = DB::table('assets')->join('sub_forms', "sub_forms.asset_id", "assets.id")->where("sub_forms.id", $sub_form_id)->first();
-            $users          = User::where('client_id', $asset->client_id)->get();
+            // $asset          = DB::table('assets')->join('sub_forms', "sub_forms.asset_id", "assets.id")->where("sub_forms.id", $sub_form_id)->first();
+
+            $users          = User::where('client_id', Auth::user()->client_id)->get();
             $questions      = DB::table('group_questions')
                                 ->join('user_responses', 'user_responses.question_id', 'group_questions.id')
                                 ->join('evaluation_rating', 'evaluation_rating.id', 'user_responses.rating')
@@ -308,7 +351,7 @@ class RemediationController extends Controller{
                 "users"         => $users,
                 "count"         => $count
             ];
-            return response()->json($data,200);
+            return response()->json($data, 200);
 
         } catch(\Exception $ex){
 
